@@ -1,0 +1,30 @@
+[Unit]
+Description=Zookeeper Systemd File
+After=syslog.target network.target
+
+[Service]
+#LimitNOFILE=infinity
+#LimitNPROC=infinity
+#LimitAS=infinity
+#LimitFSIZE=infinity
+#LimitNOFILE=4096
+#IgnoreSIGPIPE=false
+User=root
+Group=root
+Environment="KAFKA_HOME_PATH=/root/kafka"
+SyslogIdentifier=zookeeper
+PIDFile=/var/run/zookeeper/zookeeper.pid
+LOG_FILE=/var/log/zookeeper/zookeeper.log
+PermissionsStartOnly=true
+ExecStartPre=-/bin/mkdir -p /var/run/zookeeper /var/log/zookeeper /data/zookeeper
+ExecStartPre=/bin/chown -R root:root /var/run/zookeeper /var/log/zookeeper /data/zookeeper
+ExecStart=/bin/bash -c "/root/kafka/bin/zookeeper-server-start.sh /root/kafka/config/zookeeper.properties >> /var/log/zookeeper/zookeeper.log  2>&1 & echo $! > /var/run/zookeeper/zookeeper.pid"
+#SuccessExitStatus=143
+ExecReload=/bin/kill -HUP $MAINPID
+KillMode=process
+KillSignal=SIGTERM
+Restart=on-failure
+RestartSec=10s
+
+[Install]
+WantedBy=multi-user.target
